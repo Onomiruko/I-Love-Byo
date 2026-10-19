@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>I ❤️ BYO | AR Photo Spot</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+<style>body{margin:0;background:#f8f6f1;color:#222;font:16px system-ui,sans-serif;text-align:center}header{padding:24px 14px 5px}h1{font-size:2.1rem;margin:0}p{line-height:1.5}model-viewer{width:100%;height: min(65vh,550px);background:linear-gradient(#f0eee9,#ded9d0)}button{background:#151515;color:white;border:0;border-radius:30px;padding:14px 23px;font-size:1rem;font-weight:700}footer{padding:10px 20px 35px;font-size:.85rem;color:#555}.pill{background:#f2d95b;border-radius:20px;padding:5px 12px;font-size:.8rem}</style></head>
+<body><header><span class="pill">BULAWAYO · ZIMBABWE</span><h1>I ❤️ BYO</h1><p>Place our colorful 3D landmark anywhere and take a photo!</p></header>
+<model-viewer id="sign" src="./i-love-byo.glb" alt="Colorful 3D I love BYO sign" camera-controls touch-action="pan-y" shadow-intensity="1" exposure="1" ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor" ar-scale="auto" camera-orbit="30deg 70deg 4m" min-camera-orbit="auto auto 1m" max-camera-orbit="auto auto 8m">
+<button slot="ar-button">📱 View in your space / AR</button>
+</model-viewer>
+<p>Rotate the model with your finger, then tap <b>View in your space</b>.<br>Move your phone slowly to detect the floor.</p>
+<footer>Free AR prototype • Requires an AR-compatible phone and an internet connection.<br>On some devices, the AR button may not appear. You can still explore the 3D model above.</footer></body></html>
