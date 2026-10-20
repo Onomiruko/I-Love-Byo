@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101820">
+  <title>I LOVE BYO | National Gallery of Zimbabwe</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
+  <style>
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #1b2024; background: #f6f6f3; }
+    main { max-width: 700px; margin: auto; padding: 24px 18px 38px; text-align: center; }
+    .eyebrow { font-size: clamp(1.45rem, 5.5vw, 2.5rem); letter-spacing: .055em; line-height: 1.2; font-weight: 850; margin: 8px 0 12px; }
+    h1 { font-size: 1.05rem; font-weight: 400; line-height: 1.5; margin: 0 0 16px; }
+    .intro { font-size: 1.05rem; line-height: 1.6; margin: 0 auto 20px; max-width: 560px; }
+    model-viewer { display: block; width: 100%; height: min(57vh, 470px); min-height: 320px; background: radial-gradient(ellipse at 50% 45%, #fff, #e8ebeb); border-radius: 18px; overflow: hidden; --poster-color: transparent; }
+    .actions { margin: 18px auto 0; }
+    button.launch { display: inline-flex; justify-content: center; align-items: center; border: 0; border-radius: 999px; padding: 15px 28px; background: #101820; color: #fff; font: inherit; font-size: 1.05rem; font-weight: 750; box-shadow: 0 5px 18px #0002; cursor: pointer; }
+    button.launch:focus-visible, .secondary:focus-visible { outline: 3px solid #e19b1c; outline-offset: 4px; }
+    .secondary { display: none; margin: 14px auto 0; font-size: .93rem; color: #263748; text-underline-offset: 3px; padding: 9px; }
+    body.android .secondary { display: inline-block; }
+    .status { min-height: 1.1em; margin: 10px auto 0; color: #59636a; font-size: .85rem; line-height: 1.5; max-width: 540px; }
+    .instructions { margin: 17px auto 0; max-width: 510px; font-size: .98rem; line-height: 1.55; color: #3c454b; }
+    footer { margin-top: 28px; color: #68727a; font-size: .78rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">I ❤️ BYO · AR EXPERIENCE</p>
+    <h1>Welcome to the National Gallery of Zimbabwe!</h1>
+    <p class="intro">Step into our courtyard, bring “I LOVE BYO” to life in AR, and take a photo to remember your visit!</p>
+
+    <model-viewer
+      id="byo-model"
+      src="./i-love-byo.glb"
+      alt="3D I LOVE BYO monument for the National Gallery of Zimbabwe"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      camera-controls
+      auto-rotate
+      shadow-intensity="1"
+      exposure="1"
+      interaction-prompt="auto"
+      touch-action="pan-y">
+    </model-viewer>
+
+    <div class="actions">
+      <button class="launch" type="button" id="ar-launch">View in AR</button>
+      <div><a class="secondary" id="android-scene" href="#">AR not opening? Try Google Scene Viewer</a></div>
+      <p class="status" id="status" aria-live="polite"></p>
+    </div>
+
+    <p class="instructions"><strong>AR tip:</strong> Move your phone from side to side and take a few steps to scan the area.</p>
+    <footer>National Gallery of Zimbabwe in Bulawayo</footer>
+  </main>
+
+  <script>
+    // Keep the museum's working GLB and iPhone Quick Look support.
+    // Android offers BOTH the standard WebXR path and Google's direct Scene Viewer intent.
+    const model = document.getElementById('byo-model');
+    const launch = document.getElementById('ar-launch');
+    const sceneLink = document.getElementById('android-scene');
+    const status = document.getElementById('status');
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    if (isAndroid) document.body.classList.add('android');
+
+    // IMPORTANT: Google's Scene Viewer app is com.google.android.googlequicksearchbox.
+    // It is NOT the com.google.ar.core package used for the AR-only variant.
+    const modelUrl = new URL('./i-love-byo.glb', document.baseURI).href;
+    const fallbackUrl = new URL(window.location.href);
+    fallbackUrl.searchParams.set('scene-viewer-failed', '1');
+    sceneLink.href = 'intent://arvr.google.com/scene-viewer/1.0?file=' +
+      encodeURIComponent(modelUrl) +
+      '&mode=ar_preferred&title=' + encodeURIComponent('I LOVE BYO') +
+      '#Intent;scheme=https;package=com.google.android.googlequicksearchbox;' +
+      'action=android.intent.action.VIEW;S.browser_fallback_url=' +
+      encodeURIComponent(fallbackUrl.href) + ';end;';
+
+    // External button avoids relying on visibility/behavior of the AR-button slot.
+    // Do not await other promises before calling activateAR: user gesture is required.
+    launch.addEventListener('click', () => {
+      if (model.canActivateAR) {
+        try {
+          const result = model.activateAR();
+          if (result && typeof result.catch === 'function') {
+            result.catch(() => {
+              status.textContent = isAndroid
+                ? 'AR could not start. Try Google Scene Viewer below in Chrome.'
+                : 'AR could not start on this device.';
+            });
+          }
+        } catch (e) {
+          status.textContent = 'AR could not start. Please try again in your phone browser.';
+        }
+      } else {
+        status.textContent = isAndroid
+          ? 'AR is not available through this button. Try Google Scene Viewer below in Chrome.'
+          : 'AR is not available in this browser.';
+      }
+    });
+
+    model.addEventListener('error', e => {
+      if (e.detail && e.detail.type === 'loadfailure') {
+        status.textContent = 'The 3D model could not be loaded. Please check your connection.';
+      }
+    });
+
+    model.addEventListener('ar-status', e => {
+      if (e.detail && e.detail.status === 'failed') {
+        status.textContent = isAndroid
+          ? 'AR did not launch. Try Google Scene Viewer below.'
+          : 'AR could not be opened.';
+      }
+    });
+
+    if (new URLSearchParams(location.search).has('scene-viewer-failed')) {
+      status.textContent = 'Google Scene Viewer could not open. You can still rotate the 3D model above.';
+    }
+  </script>
+</body>
+</html>
